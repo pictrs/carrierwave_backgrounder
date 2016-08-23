@@ -25,8 +25,9 @@ module CarrierWave
           def enqueue_delayed_job(worker, *args)
             worker_args = {}
             if ::Delayed::Job.new.respond_to?(:queue)
-              worker_args[:queue] = (queue_options[:queue].is_a?(Proc) ? queue_options[:queue].call : queue_options[:queue]) if queue_options[:queue]
-              worker_args[:priority] = queue_options[:priority] if queue_options[:priority]
+              [:queue, :run_at, :priority].each do |arg_key|
+                worker_args[arg_key]  = (queue_options[arg_key].is_a?(Proc) ? queue_options[arg_key].call : queue_options[arg_key]) if queue_options[arg_key]
+              end
               ::Delayed::Job.enqueue worker.new(*args), worker_args
             else
               worker_args[:priority] = queue_options[:priority] if queue_options[:priority]
